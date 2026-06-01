@@ -6,7 +6,9 @@
 #include "application.h"
 #include "src/utils/logger.h"
 #include "src/app.h"
-#include "src/utils/formatter.h"
+
+// TODO: Refactor.
+const char* url = "https://api.weatherapi.com/v1/forecast.json?key=417f11a692f7406d85b150359231008&q=lahore&days=14";
 
 int main(int argc, char* argv[]){
 
@@ -14,7 +16,6 @@ int main(int argc, char* argv[]){
     log_info("VERSION=%s", APP_VERSION);
     log_info("ID=%s", APP_ID);
     
-
     /*
      * app() function starts application and once application is exited
      * a status code of type int is returned.
