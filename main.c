@@ -7,9 +7,6 @@
 #include "src/utils/logger.h"
 #include "src/app.h"
 
-// TODO: Refactor.
-const char* url = "https://api.weatherapi.com/v1/forecast.json?key=417f11a692f7406d85b150359231008&q=lahore&days=14";
-
 int main(int argc, char* argv[]){
 
     log_info("NAME=%s", APP_NAME);
