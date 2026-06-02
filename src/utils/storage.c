@@ -50,6 +50,25 @@ char* get_content(const char* file){
     return buffer;
 }
 
+/*
+ * Used to write data fetched from API to a local file to used a cache later.
+*/
+void write_content(const char* file, const char* data){
+    FILE* fptr = fopen(file, "w"); 
+    if(!fptr){
+        log_error("Failed to open the file.");
+        return;
+    }
+
+    // Write to file.
+    fputs(data, fptr);
+    
+    // Close the file to clear up memory.
+    fclose(fptr);
+
+    log_debug("Wrote file %s", file);
+}
+
 // This function is used to free up the content from heap memory.
 void clear_contents(char* buffer){
     if(buffer){
