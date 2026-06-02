@@ -3,6 +3,7 @@
 */
 
 #include <gtk/gtk.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include "../components/components.h"
 #include "../../utils/logger.h"
@@ -13,16 +14,19 @@
 #include "../../models/weather.h"
 #include "../../core/core.h"
 #include "../../utils/formatter.h"
+#include "../../app.h"
+#include "../../utils/network.h"
+#include "../../utils/storage.h"
 
+GtkWidget* root_page;
+GtkWidget* weather_container;
 
 /*
- * [TODO] This callback function is used to search for weather location.
+ * Before you laugh at me for having API_KEY directly inside the source code and pushed publicly,
+ * You must know that it is free tier and you can use it to test or generate your own api key for free.
 */
-void search_location(GtkWidget* widget, gpointer input){
-    GtkEntryBuffer* buffer = gtk_entry_get_buffer(input);
-    const char* text =  gtk_entry_buffer_get_text(buffer);
-    log_info("Searching Location: %s", text);
-}
+
+const char* API_URL = "https://api.weatherapi.com/v1/forecast.json?key=417f11a692f7406d85b150359231008&days=14&q=";
 
 /*
  * Render current location and temperature.
@@ -120,8 +124,8 @@ GtkWidget* hourly_forecast(){
 }
 
 GtkWidget* display_weather(WeatherModel* weatherData){
-    GtkWidget* root = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SPACE);
-    gtk_widget_set_hexpand(root, TRUE);
+    GtkWidget* weather_container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, SPACE);
+    gtk_widget_set_hexpand(weather_container, TRUE);
 
     // Weather data is devided into left and right sections.
 
@@ -136,10 +140,63 @@ GtkWidget* display_weather(WeatherModel* weatherData){
     gtk_widget_add_css_class(right, "right");
 
     
-    gtk_box_append(GTK_BOX(root), left);
-    gtk_box_append(GTK_BOX(root), right);
+    gtk_box_append(GTK_BOX(weather_container), left);
+    gtk_box_append(GTK_BOX(weather_container), right);
 
-    return root;
+    return weather_container;
+}
+
+void load_page(){
+
+    if(root_page && weather_container)
+        gtk_box_remove(GTK_BOX(root_page), weather_container);
+
+    WeatherModel* weatherData = get_weather_data();
+
+    if(!weatherData){
+        // Todo: Show a widget to ask user to search weather data.
+        log_debug("No Weather Data found.");
+    }
+    else{
+        weather_container = display_weather(weatherData);
+        gtk_box_append(GTK_BOX(root_page), weather_container);
+    }
+
+    clear_weather_model(weatherData);
+}
+
+/*
+ * [TODO] This callback function is used to search for weather location.
+*/
+void search_location(GtkWidget* widget, gpointer input){
+    GtkEntryBuffer* buffer = gtk_entry_get_buffer(input);
+    const char* location =  gtk_entry_buffer_get_text(buffer);
+    log_info("Searching Location: %s", location);
+
+    char* finalUrl = concat_strings(API_URL, location);
+
+    // To make sure multiple searches are not made.
+    if(!APP_STATE.is_loading){
+        APP_STATE.is_loading = true;
+        log_debug("Searching Weather Data");
+        
+        log_info(finalUrl);
+        
+        NetworkBuffer* buffer = fetch_api_data(finalUrl);
+
+        write_content("weather.json", buffer->data);
+
+        clear_network_buffer(buffer);
+        
+        APP_STATE.is_loading = false;
+
+        load_page();
+    }
+    else{
+        log_error("Previous weather search not finished yet.");
+    }
+
+    free(finalUrl);
 }
 
 /*
@@ -151,22 +208,12 @@ GtkWidget* display_weather(WeatherModel* weatherData){
  * 5- [PENDING] Add Daily Weather Forcast Container.
 */
 GtkWidget* weather_page(){
-    GtkWidget* root = gtk_box_new(GTK_ORIENTATION_VERTICAL, SPACE);
+    root_page = gtk_box_new(GTK_ORIENTATION_VERTICAL, SPACE);
 
     // Appended input widget to search for location.
-    gtk_box_append(GTK_BOX(root), read_input("Search location...", "Search", search_location));
+    gtk_box_append(GTK_BOX(root_page), read_input("Search location...", "Search", search_location));
 
-    WeatherModel* weatherData = get_weather_data();
-    if(!weatherData){
-        // Todo: Show a widget to ask user to search weather data.
-        log_debug("No Weather Data found.");
-    }
-    else{
-        log_debug("Weather data found!");
-        gtk_box_append(GTK_BOX(root), display_weather(weatherData));
-    }
+    load_page();
 
-    clear_weather_model(weatherData);
-
-    return root;
+    return root_page;
 }
