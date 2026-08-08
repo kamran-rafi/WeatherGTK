@@ -23,7 +23,7 @@ GtkWidget* weather_container;
 
 /*
  * Before you laugh at me for having API_KEY directly inside the source code and pushed publicly,
- * You must know that it is free tier and you can use it to test or generate your own api key for free.
+ * You must know that it is free tier and you can use it to test or just generate your own api key for free from their site.
 */
 
 const char* API_URL = "https://api.weatherapi.com/v1/forecast.json?key=417f11a692f7406d85b150359231008&days=14&q=";
@@ -73,7 +73,7 @@ GtkWidget* current_condition_item(const char* title,const char* text){
     gtk_widget_add_css_class(root, "current-condition-item");
     gtk_widget_set_hexpand(root, TRUE);
 
-    GtkWidget* icon = get_icon("/home/kamran/Projects/GeoGTK/src/assets/placeholder.svg", 42);
+    GtkWidget* icon = get_icon("./src/assets/placeholder.svg", 42);
     gtk_widget_add_css_class(icon, "current-condition-item-icon");
 
     GtkWidget* type = gtk_label_new(title);
@@ -146,25 +146,7 @@ GtkWidget* display_weather(WeatherModel* weatherData){
     return weather_container;
 }
 
-void load_page(){
-
-    if(root_page && weather_container)
-        gtk_box_remove(GTK_BOX(root_page), weather_container);
-
-    WeatherModel* weatherData = get_weather_data();
-
-    if(!weatherData){
-        // Todo: Show a widget to ask user to search weather data.
-        log_debug("No Weather Data found.");
-    }
-    else{
-        weather_container = display_weather(weatherData);
-        gtk_box_append(GTK_BOX(root_page), weather_container);
-    }
-
-    clear_weather_model(weatherData);
-}
-
+void load_page();
 /*
  * [TODO] This callback function is used to search for weather location.
 */
@@ -199,6 +181,27 @@ void search_location(GtkWidget* widget, gpointer input){
     free(finalUrl);
 }
 
+void load_page(){
+
+    if(root_page && weather_container){
+        gtk_box_remove(GTK_BOX(APP_STATE.current_page), weather_container);
+    }
+
+    WeatherModel* weatherData = get_weather_data();
+
+    if(!weatherData){
+        // Todo: Show a widget to ask user to search weather data.
+        log_debug("No Weather Data found.");
+    }
+    else{
+        weather_container = display_weather(weatherData);
+
+        gtk_box_append(GTK_BOX(root_page), weather_container);
+    }
+
+    clear_weather_model(weatherData);
+}
+
 /*
  * Todos: 
  * 1- [DONE] Add a Location Search Input.
@@ -210,7 +213,7 @@ void search_location(GtkWidget* widget, gpointer input){
 GtkWidget* weather_page(){
     root_page = gtk_box_new(GTK_ORIENTATION_VERTICAL, SPACE);
 
-    // Appended input widget to search for location.
+    // Appended input widget to search for location. [This one get's reappended, WHY?]
     gtk_box_append(GTK_BOX(root_page), read_input("Search location...", "Search", search_location));
 
     load_page();

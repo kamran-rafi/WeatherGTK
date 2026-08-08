@@ -79,7 +79,7 @@ GtkWidget* navbar(){
     GtkWidget* navbar = gtk_box_new(GTK_ORIENTATION_VERTICAL, SPACE);
     gtk_widget_add_css_class(navbar, "navbar");
 
-    GtkWidget* weatherButton = get_nav_button("Weather", "/home/kamran/Projects/GeoGTK/src/assets/weather.svg", weather_handler);
+    GtkWidget* weatherButton = get_nav_button("Weather", "./src/assets/weather.svg", weather_handler);
     // To make sure intial button is active when app is restarted.
     if(!APP_STATE.prev_focused_button){
         toggle_button_focus(weatherButton);
@@ -87,7 +87,7 @@ GtkWidget* navbar(){
 
     // These buttons appear at top of navbar.
     gtk_box_append(GTK_BOX(navbar), weatherButton);
-    gtk_box_append(GTK_BOX(navbar), get_nav_button("Quakes", "/home/kamran/Projects/GeoGTK/src/assets/earthquake.svg", earthquake_handler));
+    gtk_box_append(GTK_BOX(navbar), get_nav_button("Quakes", "./src/assets/earthquake.svg", earthquake_handler));
     // Adds a space between top and bottom buttons of navbar.
     GtkWidget* spacer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_vexpand(spacer, TRUE);
@@ -95,7 +95,7 @@ GtkWidget* navbar(){
     ////////////////////////////////////////////////////////
 
     // This button appears at bottom of navbar.
-    gtk_box_append(GTK_BOX(navbar), get_nav_button("Settings", "/home/kamran/Projects/GeoGTK/src/assets/settings.svg", settings_handler));
+    gtk_box_append(GTK_BOX(navbar), get_nav_button("Settings", "./src/assets/settings.svg", settings_handler));
 
     return navbar;
 }

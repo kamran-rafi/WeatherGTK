@@ -20,7 +20,7 @@ void destroy(GtkWindow* window, gpointer data){
 
 // TODO:: Refactor it out once I add Settings page for dynamic theme changing.
 void setup_theme(){
-    char* path = "/home/kamran/Projects/GeoGTK/src/styles/night.css";
+    char* path = "./src/styles/night.css";
     GtkCssProvider* provider = gtk_css_provider_new();
     gtk_css_provider_load_from_path(provider, path);
     gtk_style_context_add_provider_for_display(
